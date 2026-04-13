@@ -7,7 +7,7 @@ client = anthropic.AsyncAnthropic(api_key=settings.ANTHROPIC_API_KEY)
 
 class ExplainerAgent:
     def __init__(self):
-        self.model = "claude-sonnet-4-6"
+        self.model = "claude-3-7-sonnet-20250219"
         self.system_prompt = (
             "You are a plain language legal document explainer for LegalClear. "
             "Your job is to help ordinary people with no legal background understand "

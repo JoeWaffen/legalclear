@@ -6,7 +6,7 @@ client = anthropic.AsyncAnthropic(api_key=settings.ANTHROPIC_API_KEY)
 
 class ClassifierAgent:
     def __init__(self):
-        self.model = "claude-haiku-4-5-20251001"
+        self.model = "claude-3-5-haiku-20241022"
         self.system_prompt = (
             "You are a legal document classification expert. "
             "Your only job is to analyze legal documents and return "

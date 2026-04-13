@@ -7,8 +7,8 @@ client = anthropic.AsyncAnthropic(api_key=settings.ANTHROPIC_API_KEY)
 
 class ExpungementAgent:
     def __init__(self):
-        self.model = "claude-sonnet-4-6"
-        self.haiku = "claude-haiku-4-5-20251001"
+        self.model = "claude-3-7-sonnet-20250219"
+        self.haiku = "claude-3-5-haiku-20241022"
         self.system_prompt = (
             "You are an expungement petition guide for LegalClear. "
             "You help people understand the expungement process and fill out "

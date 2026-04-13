@@ -3,6 +3,10 @@ import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import './i18n';
 
+import UploadPage from './pages/UploadPage';
+import ProcessingPage from './pages/ProcessingPage';
+import ResultsPage from './pages/ResultsPage';
+
 export default function App() {
   const { t, i18n } = useTranslation();
 
@@ -35,7 +39,7 @@ export default function App() {
           <Suspense fallback={<div className="animate-pulse flex space-x-4">Loading application...</div>}>
             <Routes>
               <Route path="/" element={<UploadPage t={t} />} />
-              <Route path="/processing/:sessionId" element={<ProcessingPage t={t} />} />
+              <Route path="/processing/:documentId" element={<ProcessingPage t={t} />} />
               <Route path="/results/:documentId" element={<ResultsPage t={t} />} />
               <Route path="/subscribe" element={<SubscriptionPage t={t} />} />
             </Routes>
@@ -48,29 +52,6 @@ export default function App() {
       </div>
     </BrowserRouter>
   );
-}
-
-/* Stubs for the 4 primary Routes pending deeper implementation */
-function UploadPage({ t }) {
-  return (
-    <div className="w-full max-w-3xl mx-auto mt-10 bg-white shadow-xl rounded-2xl p-8 border border-border_color">
-       <h1 className="text-4xl font-extrabold text-navy text-center mb-4 leading-tight">{t('welcome')}</h1>
-       
-       <div className="flex flex-col items-center justify-center border-2 border-dashed border-teal rounded-xl p-12 bg-surface hover:bg-teal hover:bg-opacity-10 transition-colors cursor-pointer group">
-         <svg className="w-16 h-16 text-teal mb-4 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
-         <h3 className="text-xl font-bold text-navy">{t('drag_drop')}</h3>
-         <p className="text-gray-500 mt-2">{t('paste_text')}</p>
-       </div>
-    </div>
-  );
-}
-
-function ProcessingPage({ t }) {
-  return <div className="text-center pt-24"><div className="text-2xl font-bold animate-pulse text-teal">{t('processing')}</div></div>;
-}
-
-function ResultsPage({ t }) {
-  return <div className="bg-white shadow p-8 rounded-xl border border-red_flag"><h1 className="text-2xl font-bold text-navy">{t('risk_report')} Tab Architecture Pending Implementation</h1></div>;
 }
 
 function SubscriptionPage({ t }) {

@@ -7,7 +7,7 @@ client = anthropic.AsyncAnthropic(api_key=settings.ANTHROPIC_API_KEY)
 
 class FormGuideAgent:
     def __init__(self):
-        self.model = "claude-sonnet-4-6"
+        self.model = "claude-3-7-sonnet-20250219"
         self.system_prompt = (
             "You are a government and court form completion guide for LegalClear. "
             "You help ordinary people fill out legal and government forms correctly "

@@ -7,7 +7,7 @@ client = anthropic.AsyncAnthropic(api_key=settings.ANTHROPIC_API_KEY)
 
 class RiskScannerAgent:
     def __init__(self):
-        self.model = "claude-haiku-4-5-20251001"
+        self.model = "claude-3-5-haiku-20241022"
         self.system_prompt = (
             "You are a legal document risk scanner for LegalClear. "
             "You identify clauses and terms that are unusual, potentially harmful, "

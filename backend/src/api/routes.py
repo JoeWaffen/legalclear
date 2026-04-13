@@ -78,19 +78,51 @@ async def upload_document(file: UploadFile = File(...), user_id: str = Form(...)
     if access['allowed']:
         s_id = db.create_session(user_id, file.filename, doc['token_estimate'], tier['tier'], 0, access['payment_type'])
         d_id = db.create_document(s_id, doc['text'])
+        db.save_results(d_id, classification, {}, {}, {}, {}, escalation, user_language)
         return {"session_id": s_id, "document_id": d_id, "classification": classification, "escalation": escalation, "price_tier": tier, "requires_payment": False, "client_secret": None, "pre_analysis_warning": escalation.get('pre_analysis_warning'), "language": user_language}
     else:
         s_id = db.create_session(user_id, file.filename, doc['token_estimate'], tier['tier'], tier['price_usd'], "payg")
         d_id = db.create_document(s_id, doc['text'])
+        db.save_results(d_id, classification, {}, {}, {}, {}, escalation, user_language)
         intent = stripe_client.create_payment_intent(tier['price_usd'], s_id, user.get('email',''), {"document_id": d_id})
         return {"session_id": s_id, "document_id": d_id, "classification": classification, "escalation": escalation, "price_tier": tier, "requires_payment": True, "client_secret": intent.get('client_secret'), "pre_analysis_warning": escalation.get('pre_analysis_warning'), "language": user_language}
 
-@app.post("/process/{session_id}", dependencies=[Depends(verify_api_key)])
-async def process_document(session_id: str):
-    sess = db.get_session(session_id)
-    # mock full completion logic
+import asyncio
+
+@app.post("/process/{document_id}", dependencies=[Depends(verify_api_key)])
+async def process_document(document_id: str):
+    doc = db.get_document(document_id)
+    if not doc or not doc.get('id'):
+        raise HTTPException(status_code=404, detail="Document not found")
+        
+    sess = db.get_session(doc.get('session_id'))
+    text = doc.get('document_text', '')
+    classification = doc.get('classification', {})
+    escalation = doc.get('escalation', {})
+    lang = doc.get('language', 'en')
+    
+    # Run Agents Concurrently
+    tasks = [
+        explainer.explain({"text": text}, classification, lang),
+        risk_scanner.scan({"text": text}, classification, lang),
+        form_guide.guide({"text": text}, classification, lang)
+    ]
+    results = await asyncio.gather(*tasks)
+    explanation, risk_scan, form_guide_res = results
+    
+    db.save_results(
+        document_id, 
+        classification, 
+        explanation, 
+        form_guide_res, 
+        risk_scan, 
+        {}, 
+        escalation, 
+        lang
+    )
+    
     await notifications.notify_document_ready(sess.get('user_id', ''), "doc_completed")
-    return {"status": "complete"}
+    return {"status": "complete", "document_id": document_id}
 
 @app.post("/chat/{document_id}", dependencies=[Depends(verify_api_key)])
 async def chat(document_id: str, question: str = Form(...), user_language: str = Form('en')):
