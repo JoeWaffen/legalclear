@@ -57,11 +57,14 @@ class DatabaseManager:
     def create_session(self, user_id: str, filename: str, token_count: int, price_tier: str, price_usd: int, payment_type: str) -> str:
         s_id = str(uuid.uuid4())
         if not self.supabase: return s_id
-        self.supabase.table('sessions').insert({
-            "id": s_id, "user_id": user_id, "document_filename": filename,
-            "document_token_count": token_count, "price_tier": price_tier,
-            "price_paid_usd": price_usd, "payment_type": payment_type
-        }).execute()
+        try:
+            self.supabase.table('sessions').insert({
+                "id": s_id, "user_id": user_id, "document_filename": filename,
+                "document_token_count": token_count, "price_tier": price_tier,
+                "price_paid_usd": price_usd, "payment_type": payment_type
+            }).execute()
+        except Exception:
+            pass
         return s_id
 
     def update_payment_status(self, session_id: str, status: str, payment_intent: str = None, subscription_id: str = None):
@@ -79,19 +82,25 @@ class DatabaseManager:
     def create_document(self, session_id: str, document_text: str = '') -> str:
         d_id = str(uuid.uuid4())
         if not self.supabase: return d_id
-        self.supabase.table('documents').insert({
-            "id": d_id, "session_id": session_id, "document_text": document_text
-        }).execute()
+        try:
+            self.supabase.table('documents').insert({
+                "id": d_id, "session_id": session_id, "document_text": document_text
+            }).execute()
+        except Exception:
+            pass
         return d_id
 
     def save_results(self, document_id: str, classification: dict, explanation: dict, form_guide: dict, risk_scan: dict, expungement_guide: dict, escalation: dict, language: str):
         if not self.supabase: return
-        self.supabase.table('documents').update({
-            "classification": classification, "explanation": explanation,
-            "form_guide": form_guide, "risk_scan": risk_scan,
-            "expungement_guide": expungement_guide, "escalation": escalation,
-            "language": language, "status": "complete"
-        }).eq("id", document_id).execute()
+        try:
+            self.supabase.table('documents').update({
+                "classification": classification, "explanation": explanation,
+                "form_guide": form_guide, "risk_scan": risk_scan,
+                "expungement_guide": expungement_guide, "escalation": escalation,
+                "language": language, "status": "complete"
+            }).eq("id", document_id).execute()
+        except Exception:
+            pass
 
     def update_document_status(self, document_id: str, status: str):
         if not self.supabase: return
