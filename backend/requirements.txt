@@ -8,6 +8,7 @@ supabase
 stripe
 python-dotenv
 pydantic
+pydantic-settings
 aiohttp
 python-multipart
 pytest
