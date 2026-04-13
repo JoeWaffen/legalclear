@@ -1,7 +1,6 @@
 from .pdf_parser import PDFParser
 from .ocr import OCRProcessor
 from .text_cleaner import TextCleaner
-import magic
 import os
 
 async def ingest_document(file_bytes: bytes, filename: str) -> dict:

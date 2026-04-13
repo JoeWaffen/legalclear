@@ -16,4 +16,3 @@ deep-translator
 reportlab
 weasyprint
 playwright
-python-magic
