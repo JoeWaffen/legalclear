@@ -1,0 +1,17 @@
+anthropic
+fastapi
+uvicorn
+pymupdf
+pytesseract
+pillow
+supabase
+stripe
+python-dotenv
+pydantic
+aiohttp
+python-multipart
+pytest
+deep-translator
+reportlab
+weasyprint
+playwright

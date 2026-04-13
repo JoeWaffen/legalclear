@@ -1,0 +1,18 @@
+[Unit]
+Description=LegalClear Backend API
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=YOUR_USERNAME_HERE
+WorkingDirectory=/home/YOUR_USERNAME_HERE/legalclear/backend
+EnvironmentFile=/home/YOUR_USERNAME_HERE/legalclear/backend/.env
+ExecStart=/home/YOUR_USERNAME_HERE/legalclear/backend/venv/bin/python main.py
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

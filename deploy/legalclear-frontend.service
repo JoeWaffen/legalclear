@@ -1,0 +1,14 @@
+[Unit]
+Description=LegalClear Web Frontend
+After=network-online.target
+
+[Service]
+Type=simple
+User=YOUR_USERNAME_HERE
+WorkingDirectory=/home/YOUR_USERNAME_HERE/legalclear/frontend
+ExecStart=/usr/bin/npm run preview -- --port 3000 --host
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
