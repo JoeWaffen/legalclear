@@ -35,7 +35,14 @@ class DatabaseManager:
     def get_user(self, user_id: str) -> dict:
         if not self.supabase: return {"id": user_id, "subscription_status": "free"}
         res = self.supabase.table('users').select('*').eq('id', user_id).execute()
-        return res.data[0] if res.data else {}
+        if not res.data:
+            try:
+                new_user = {"id": user_id, "email": f"{user_id}@demo.com"}
+                res = self.supabase.table('users').insert(new_user).execute()
+                return res.data[0]
+            except Exception:
+                return {"id": user_id, "subscription_status": "free"}
+        return res.data[0]
 
     def mark_free_doc_used(self, user_id: str):
         if not self.supabase: return
