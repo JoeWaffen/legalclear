@@ -34,7 +34,10 @@ class DatabaseManager:
 
     def get_user(self, user_id: str) -> dict:
         if not self.supabase: return {"id": user_id, "subscription_status": "free"}
-        res = self.supabase.table('users').select('*').eq('id', user_id).execute()
+        try:
+            res = self.supabase.table('users').select('*').eq('id', user_id).execute()
+        except Exception:
+            return {"id": user_id, "subscription_status": "free"}
         if not res.data:
             try:
                 new_user = {"id": user_id, "email": f"{user_id}@demo.com"}
@@ -76,8 +79,11 @@ class DatabaseManager:
 
     def get_session(self, session_id: str) -> dict:
         if not self.supabase: return {"id": session_id}
-        res = self.supabase.table('sessions').select('*').eq('id', session_id).execute()
-        return res.data[0] if res.data else {}
+        try:
+            res = self.supabase.table('sessions').select('*').eq('id', session_id).execute()
+            return res.data[0] if res.data else {}
+        except Exception:
+            return {"id": session_id}
 
     def create_document(self, session_id: str, document_text: str = '') -> str:
         d_id = str(uuid.uuid4())
@@ -108,8 +114,11 @@ class DatabaseManager:
 
     def get_document(self, document_id: str) -> dict:
         if not self.supabase: return {"id": document_id, "status": "complete"}
-        res = self.supabase.table('documents').select('*').eq('id', document_id).execute()
-        return res.data[0] if res.data else {}
+        try:
+            res = self.supabase.table('documents').select('*').eq('id', document_id).execute()
+            return res.data[0] if res.data else {}
+        except Exception:
+            return {"id": document_id, "status": "complete"}
 
     def get_user_documents(self, user_id: str, limit: int = 20) -> list:
         if not self.supabase: return []
