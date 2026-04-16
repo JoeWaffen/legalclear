@@ -1,70 +1,177 @@
-import json
-import anthropic
+import json, os
+from anthropic import Anthropic
 from src.core.config import settings
 from src.core.disclaimer import get_disclaimer
 
-client = anthropic.AsyncAnthropic(api_key=settings.ANTHROPIC_API_KEY)
+SYSTEM_PROMPT = (
+    "You are a government and court form completion guide "
+    "for LegalClear. You help ordinary people fill out legal "
+    "and government forms correctly and completely. You explain "
+    "each field in plain language. You know requirements for "
+    "federal and state forms across all 50 US states. You flag "
+    "common mistakes. You tell people exactly what to write. "
+    "You never give legal advice. When the user's language is "
+    "Spanish, respond entirely in Spanish. Return valid JSON "
+    "only. No preamble. No markdown. JSON only."
+)
+
 
 class FormGuideAgent:
+
     def __init__(self):
-        self.model = "claude-3-7-sonnet-20250219"
-        self.system_prompt = (
-            "You are a government and court form completion guide for LegalClear. "
-            "You help ordinary people fill out legal and government forms correctly "
-            "and completely. You explain each field in plain language. You know "
-            "requirements for federal and state forms across the US. You flag common "
-            "mistakes. You tell people exactly what to write. You never give legal advice. "
-            "When the user's language is Spanish, respond entirely in Spanish. "
-            "Return valid JSON only. No preamble. No markdown. JSON only."
+        self.client = Anthropic(
+            api_key=settings.ANTHROPIC_API_KEY)
+        self.model = "claude-sonnet-4-6"
+        self._load_forms_library()
+
+    def _load_forms_library(self):
+        path = os.path.join(
+            os.path.dirname(__file__),
+            "../data/forms_library.json")
+        try:
+            with open(path) as f:
+                self.forms_library = json.load(f)
+        except Exception:
+            self.forms_library = {}
+
+    async def guide(self, document: dict,
+                    classification: dict,
+                    lang: str = "en") -> dict:
+        spanish = (
+            "Respond entirely in Spanish. "
+            "All JSON values must be in Spanish."
+            if lang == "es" else ""
         )
+        doc_type = classification.get("document_type", "")
+        form_meta = self.forms_library.get(doc_type, {})
+        official_url = form_meta.get("official_url", "")
 
-    async def guide(self, document: dict, classification: dict, lang: str = 'en') -> dict:
-        doc_cat = classification.get('document_category', '')
-        if doc_cat not in ['government_form', 'court_filing', 'small_claims_complaint', 'small_claims_response', 'small_claims_judgment']:
-            return {}
+        user_prompt = f"""Language: {lang}
+{spanish}
+Form type: {classification.get("document_type")}
+Issuing agency: {classification.get("issuing_agency")}
+Jurisdiction: {classification.get("jurisdiction_name")}
+Filing deadline: {classification.get("filing_deadline")}
+Official URL if known: {official_url}
 
-        lang_instr = "Respond entirely in Spanish." if lang == 'es' else ""
-        text = document.get('text', '')[:40000]
+Create a complete field-by-field completion guide.
+Return JSON with exactly these fields:
 
-        user_prompt = f"""
-{lang_instr}
-Form extracted text: {text}
+form_overview: string explaining what this form is,
+why people file it, what it does
 
-Return JSON with these fields:
-- form_overview: str
-- before_you_start: list[str]
-- sections: list[dict] (each: {{section_name, description, fields: list[{{field_name, field_number, plain_label, instructions, example, common_mistakes, required: bool}}]}})
-- where_to_file: dict ({{methods, address, online_url, fee, copies_needed, what_to_keep}})
-- after_filing: list[str]
-- deadline_warning: str or null
-- small_claims_hearing_tips: list[str] or null
-- disclaimer: str
-"""
-        res = {
-            "form_overview": "Mock form guide",
-            "sections": [],
-            "where_to_file": {},
-        }
+before_you_start: list of strings for docs to gather
 
-        if settings.ANTHROPIC_API_KEY:
-            try:
-                response = await client.messages.create(
-                    model=self.model,
-                    max_tokens=2500,
-                    system=[{"type": "text", "text": self.system_prompt, "cache_control": {"type": "ephemeral"}}],
-                    messages=[{"role": "user", "content": user_prompt}]
-                )
-                res = json.loads(response.content[0].text)
-            except Exception:
-                pass
+sections: list of section objects, each with:
+  section_name, description, and fields list where
+  each field has: field_name, field_number,
+  plain_label, instructions, example,
+  common_mistakes, required (boolean)
 
-        res['disclaimer'] = get_disclaimer(lang, 'standard')
-        return res
+where_to_file: object with: methods (list),
+address, online_url, fee, copies_needed, what_to_keep
 
-    async def answer_form_question(self, document: dict, classification: dict, guide: dict, question: str, chat_history: list, lang: str = 'en') -> dict:
-        return {
-            "answer": f"Mock form guide answer to: {question}",
-            "confidence": "high",
-            "disclaimer": get_disclaimer(lang, 'short'),
-            "language": lang
-        }
+after_filing: list of strings for next steps
+
+deadline_warning: string if deadline is real, null if none
+
+small_claims_hearing_tips: list of strings if small
+claims document, null otherwise
+
+Document text:
+{document.get("text", "")[:80000]}"""
+
+        try:
+            response = self.client.messages.create(
+                model=self.model,
+                max_tokens=4096,
+                system=[{
+                    "type": "text",
+                    "text": SYSTEM_PROMPT,
+                    "cache_control": {"type": "ephemeral"}
+                }],
+                messages=[{
+                    "role": "user",
+                    "content": user_prompt
+                }]
+            )
+            raw = response.content[0].text.strip()
+            if raw.startswith("```"):
+                raw = raw.split("```")[1]
+                if raw.startswith("json"):
+                    raw = raw[4:]
+            result = json.loads(raw)
+            result["disclaimer"] = get_disclaimer(
+                lang, "standard")
+            return result
+        except Exception as e:
+            return {"error": True, "message": str(e),
+                    "disclaimer": get_disclaimer(
+                        lang, "standard")}
+
+    async def answer_form_question(
+            self, document: dict,
+            classification: dict,
+            guide: dict, question: str,
+            chat_history: list,
+            lang: str = "en") -> dict:
+        spanish = (
+            "Respond entirely in Spanish."
+            if lang == "es" else ""
+        )
+        context = (
+            f"Form type: "
+            f"{classification.get('document_type')}\n"
+            f"Jurisdiction: "
+            f"{classification.get('jurisdiction_name')}\n"
+            f"Form overview: "
+            f"{guide.get('form_overview', '')}\n\n"
+            f"Document text:\n"
+            f"{document.get('text', '')[:30000]}"
+        )
+        messages = [
+            {"role": "user", "content": context},
+            {"role": "assistant",
+             "content": (
+                 "I have reviewed this form and its "
+                 "completion guide. Ready to answer "
+                 "questions about how to fill it out.")}
+        ]
+        for msg in chat_history:
+            messages.append({
+                "role": msg.get("role", "user"),
+                "content": msg.get("content", "")
+            })
+        messages.append({
+            "role": "user",
+            "content": f"{spanish}\n{question}"
+        })
+        try:
+            response = self.client.messages.create(
+                model=self.model,
+                max_tokens=1024,
+                system=[{
+                    "type": "text",
+                    "text": SYSTEM_PROMPT,
+                    "cache_control": {"type": "ephemeral"}
+                }],
+                messages=messages
+            )
+            answer = response.content[0].text.strip()
+            return {
+                "answer": answer,
+                "confidence": "high",
+                "disclaimer": get_disclaimer(lang, "short"),
+                "language": lang
+            }
+        except Exception as e:
+            return {
+                "answer": (
+                    "No pude procesar su pregunta."
+                    if lang == "es"
+                    else "Could not process your question."),
+                "confidence": "low",
+                "disclaimer": get_disclaimer(lang, "short"),
+                "language": lang,
+                "error": str(e)
+            }

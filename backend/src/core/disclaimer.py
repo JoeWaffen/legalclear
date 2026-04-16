@@ -1,23 +1,81 @@
-DISCLAIMER_EN = "This is not legal advice. No attorney-client relationship is created. Please consult a licensed attorney in your jurisdiction for legal advice tailored to your situation."
-DISCLAIMER_ES = "Esto no es asesoramiento legal. No se crea una relación abogado-cliente. Por favor consulte a un abogado con licencia en su jurisdicción."
+DISCLAIMER_EN = (
+    "IMPORTANT: This is not legal advice. LegalClear is an "
+    "AI-powered tool that helps you understand legal documents "
+    "in plain language. It does not create an attorney-client "
+    "relationship and is not a substitute for advice from a "
+    "licensed attorney. For decisions involving your legal "
+    "rights, obligations, or significant financial "
+    "consequences, consult a licensed attorney in your "
+    "jurisdiction."
+)
 
-SHORT_DISCLAIMER_EN = "Not legal advice. For informational purposes only."
-SHORT_DISCLAIMER_ES = "No es asesoramiento legal. Solo para fines informativos."
+DISCLAIMER_ES = (
+    "IMPORTANTE: Esto no es asesoramiento legal. LegalClear "
+    "es una herramienta de inteligencia artificial que le "
+    "ayuda a comprender documentos legales en lenguaje "
+    "sencillo. No crea una relacion abogado-cliente y no "
+    "sustituye el consejo de un abogado con licencia. Para "
+    "decisiones que involucren sus derechos legales, consulte "
+    "a un abogado con licencia en su jurisdiccion."
+)
 
-CRIMINAL_WARNING_EN = "WARNING: This appears to be a criminal matter. Your rights can be permanently affected. Please contact a public defender or private attorney immediately before making decisions."
-CRIMINAL_WARNING_ES = "ADVERTENCIA: Este parece ser un asunto penal. Sus derechos pueden verse afectados permanentemente. Comuníquese con un defensor público o abogado privado inmediatamente."
+SHORT_DISCLAIMER_EN = (
+    "Not legal advice. For informational purposes only."
+)
 
-PLEA_WARNING_EN = "STRONG WARNING: Do not sign a plea agreement without speaking to an attorney or public defender first. This waives extremely important constitutional rights."
-PLEA_WARNING_ES = "FUERTE ADVERTENCIA: No firme un acuerdo de culpabilidad sin hablar antes con un abogado. Esto renuncia a derechos constitucionales importantes."
+SHORT_DISCLAIMER_ES = (
+    "No es asesoramiento legal. "
+    "Solo para fines informativos."
+)
 
-def get_disclaimer(lang: str, level: str = 'standard') -> str:
-    lang = 'es' if lang == 'es' else 'en'
-    
-    if level == 'short':
-        return SHORT_DISCLAIMER_ES if lang == 'es' else SHORT_DISCLAIMER_EN
-    elif level == 'criminal':
-        return CRIMINAL_WARNING_ES if lang == 'es' else CRIMINAL_WARNING_EN
-    elif level == 'plea':
-        return PLEA_WARNING_ES if lang == 'es' else PLEA_WARNING_EN
-    else:
-        return DISCLAIMER_ES if lang == 'es' else DISCLAIMER_EN
+CRIMINAL_WARNING_EN = (
+    "This appears to be a criminal matter. LegalClear can "
+    "help you understand what this document says in plain "
+    "language. However, criminal cases involve rights that "
+    "can be permanently affected by your decisions. If you "
+    "cannot afford an attorney, you have the right to a "
+    "public defender. Contact your local public defender "
+    "before making any decisions about your case."
+)
+
+CRIMINAL_WARNING_ES = (
+    "Este parece ser un asunto penal. LegalClear puede "
+    "ayudarle a comprender este documento en lenguaje "
+    "sencillo. Sin embargo, los casos penales involucran "
+    "derechos que pueden verse afectados permanentemente. "
+    "Si no puede pagar un abogado, tiene derecho a un "
+    "defensor publico. Comuniquese con el defensor publico "
+    "local antes de tomar decisiones sobre su caso."
+)
+
+PLEA_WARNING_EN = (
+    "WARNING: This is a plea agreement. Signing this "
+    "document waives important legal rights that cannot "
+    "be recovered. Do NOT sign without first speaking to "
+    "an attorney or public defender. This is the single "
+    "most important action you can take right now."
+)
+
+PLEA_WARNING_ES = (
+    "ADVERTENCIA: Este es un acuerdo de culpabilidad. "
+    "Firmar este documento renuncia a derechos legales "
+    "importantes que no se pueden recuperar. NO firme sin "
+    "antes hablar con un abogado o defensor publico."
+)
+
+
+def get_disclaimer(lang: str,
+                   level: str = "standard") -> str:
+    lang = "es" if lang == "es" else "en"
+    if level == "standard":
+        return DISCLAIMER_ES if lang == "es" else DISCLAIMER_EN
+    if level == "short":
+        return (SHORT_DISCLAIMER_ES
+                if lang == "es" else SHORT_DISCLAIMER_EN)
+    if level == "criminal":
+        return (CRIMINAL_WARNING_ES
+                if lang == "es" else CRIMINAL_WARNING_EN)
+    if level == "plea":
+        return (PLEA_WARNING_ES
+                if lang == "es" else PLEA_WARNING_EN)
+    return DISCLAIMER_EN

@@ -1,107 +1,176 @@
 import json
-import anthropic
+from anthropic import Anthropic
 from src.core.config import settings
 from src.core.disclaimer import get_disclaimer
 
-client = anthropic.AsyncAnthropic(api_key=settings.ANTHROPIC_API_KEY)
+GUIDE_SYSTEM_PROMPT = (
+    "You are an expungement petition guide for LegalClear. "
+    "You help people understand the expungement process and "
+    "fill out expungement petitions correctly. Expungement "
+    "seals or clears a criminal record, giving people a fresh "
+    "start in employment, housing, and professional licensing. "
+    "You explain every step clearly in plain language. You know "
+    "expungement laws for all 50 US states. You never give "
+    "legal advice. When the user's language is Spanish, respond "
+    "entirely in Spanish. Return valid JSON only. "
+    "No preamble. No markdown. JSON only."
+)
+
+ELIGIBILITY_SYSTEM_PROMPT = (
+    "You are a preliminary expungement eligibility assessor "
+    "for LegalClear. You provide general eligibility estimates "
+    "based on jurisdiction, offense type, and time elapsed. "
+    "You are always clear this is preliminary only and not "
+    "legal advice. Individual circumstances vary. Always "
+    "recommend verifying with the court. Return valid JSON "
+    "only. No preamble. No markdown. JSON only."
+)
+
 
 class ExpungementAgent:
+
     def __init__(self):
-        self.model = "claude-3-7-sonnet-20250219"
-        self.haiku = "claude-3-5-haiku-20241022"
-        self.system_prompt = (
-            "You are an expungement petition guide for LegalClear. "
-            "You help people understand the expungement process and fill out "
-            "expungement petitions correctly. Expungement seals or clears a criminal record, "
-            "giving people a fresh start in employment, housing, and licensing. "
-            "You explain every step clearly in plain language. You know expungement laws "
-            "for all 50 US states. You never give legal advice. "
-            "When the user's language is Spanish, respond entirely in Spanish. "
-            "Return valid JSON only. No preamble. No markdown. JSON only."
+        self.client = Anthropic(
+            api_key=settings.ANTHROPIC_API_KEY)
+        self.guide_model = "claude-sonnet-4-6"
+        self.eligibility_model = "claude-haiku-4-5-20251001"
+
+    async def guide(self, document: dict,
+                    classification: dict,
+                    lang: str = "en") -> dict:
+        spanish = (
+            "Respond entirely in Spanish. "
+            "All JSON values must be in Spanish."
+            if lang == "es" else ""
+        )
+        jurisdiction = classification.get(
+            "jurisdiction_name", "unknown")
+
+        user_prompt = f"""Language: {lang}
+{spanish}
+Jurisdiction: {jurisdiction}
+Document type: expungement_petition
+
+Return JSON with:
+
+what_is_expungement: plain language explanation of what
+expungement does and why it matters
+
+eligibility_overview: general criteria for {jurisdiction},
+always note eligibility varies by case
+
+before_you_start: list of documents and info to gather
+
+steps: list of step objects each with:
+  step_number, title, instructions, tips,
+  estimated_time, cost
+
+form_fields: list of field objects each with:
+  field_name, plain_label, instructions,
+  example, common_mistakes, required
+
+where_to_file: object with: court_type, methods,
+address_note, online_url, fee, fee_waiver_note
+
+after_filing: list of strings
+
+what_changes_after: list of concrete improvements
+after successful expungement
+
+what_does_not_change: list of important limitations
+
+free_resources: list of objects each with:
+  label, url, description
+Always include expungement.com and lawhelp.org
+
+Document text:
+{document.get("text", "")[:80000]}"""
+
+        try:
+            response = self.client.messages.create(
+                model=self.guide_model,
+                max_tokens=4096,
+                system=[{
+                    "type": "text",
+                    "text": GUIDE_SYSTEM_PROMPT,
+                    "cache_control": {"type": "ephemeral"}
+                }],
+                messages=[{
+                    "role": "user",
+                    "content": user_prompt
+                }]
+            )
+            raw = response.content[0].text.strip()
+            if raw.startswith("```"):
+                raw = raw.split("```")[1]
+                if raw.startswith("json"):
+                    raw = raw[4:]
+            result = json.loads(raw)
+            result["disclaimer"] = get_disclaimer(
+                lang, "standard")
+            return result
+        except Exception as e:
+            return {"error": True, "message": str(e),
+                    "disclaimer": get_disclaimer(
+                        lang, "standard")}
+
+    async def check_eligibility(
+            self, jurisdiction: str,
+            offense_description: str,
+            years_since_offense: int,
+            lang: str = "en") -> dict:
+        spanish = (
+            "Respond entirely in Spanish."
+            if lang == "es" else ""
         )
 
-    async def guide(self, document: dict, classification: dict, lang: str = 'en') -> dict:
-        doc_cat = classification.get('document_category', '')
-        if doc_cat != 'expungement_petition':
-            return {}
-
-        text = document.get('text', '')[:40000]
-        lang_instr = "Respond entirely in Spanish." if lang == 'es' else ""
-
-        user_prompt = f"""
-{lang_instr}
-Document text: {text}
-
-Return JSON with these fields:
-- what_is_expungement: str
-- eligibility_overview: str
-- before_you_start: list[str]
-- steps: list[dict] (each: {{step_number, title, instructions, tips, estimated_time, cost}})
-- form_fields: list[dict] (each: {{field_name, plain_label, instructions, example, common_mistakes, required: bool}})
-- where_to_file: dict ({{court_type, methods, address_note, online_url, fee, fee_waiver_note}})
-- after_filing: list[str]
-- what_changes_after: list[str]
-- what_does_not_change: list[str]
-- free_resources: list[dict] (each: {{label, url, description}})
-- disclaimer: str
-"""
-        res = {
-            "what_is_expungement": "Mock expungement guide.",
-            "free_resources": [
-                {"label": "Expungement Info", "url": "https://www.expungement.com", "description": "National context"}
-            ]
-        }
-
-        if settings.ANTHROPIC_API_KEY:
-            try:
-                response = await client.messages.create(
-                    model=self.model,
-                    max_tokens=2500,
-                    system=[{"type": "text", "text": self.system_prompt, "cache_control": {"type": "ephemeral"}}],
-                    messages=[{"role": "user", "content": user_prompt}]
-                )
-                res = json.loads(response.content[0].text)
-            except Exception:
-                pass
-
-        res['disclaimer'] = get_disclaimer(lang, 'standard')
-        return res
-
-    async def check_eligibility(self, jurisdiction: str, offense_description: str, years_since_offense: int, lang: str = 'en') -> dict:
-        lang_instr = "Respond entirely in Spanish." if lang == 'es' else ""
-        user_prompt = f"""
-{lang_instr}
+        user_prompt = f"""Language: {lang}
+{spanish}
 Jurisdiction: {jurisdiction}
 Offense: {offense_description}
-Years since: {years_since_offense}
+Years since offense: {years_since_offense}
 
-Return JSON:
-- likely_eligible: bool
-- confidence: str
-- reasoning: str
-- key_factors: list[str]
-- next_steps: list[str]
-- disclaimer: str
-"""
-        res = {
-            "likely_eligible": False,
-            "confidence": "low",
-            "reasoning": "Mock eligibility.",
-            "key_factors": [],
-            "next_steps": []
-        }
+Return JSON with:
+likely_eligible: boolean
+confidence: one of: high, medium, low
+reasoning: plain language explanation
+key_factors: list of strings
+next_steps: list of strings
+disclaimer: always include that this is preliminary
+only and not legal advice"""
 
-        if settings.ANTHROPIC_API_KEY:
-             try:
-                 response = await client.messages.create(
-                     model=self.haiku,
-                     max_tokens=1000,
-                     system=[{"type": "text", "text": self.system_prompt}],
-                     messages=[{"role": "user", "content": user_prompt}]
-                 )
-                 res = json.loads(response.content[0].text)
-             except Exception:
-                 pass
-        
-        res['disclaimer'] = get_disclaimer(lang, 'standard')
-        return res
+        try:
+            response = self.client.messages.create(
+                model=self.eligibility_model,
+                max_tokens=1024,
+                system=[{
+                    "type": "text",
+                    "text": ELIGIBILITY_SYSTEM_PROMPT,
+                    "cache_control": {"type": "ephemeral"}
+                }],
+                messages=[{
+                    "role": "user",
+                    "content": user_prompt
+                }]
+            )
+            raw = response.content[0].text.strip()
+            if raw.startswith("```"):
+                raw = raw.split("```")[1]
+                if raw.startswith("json"):
+                    raw = raw[4:]
+            return json.loads(raw)
+        except Exception as e:
+            return {
+                "likely_eligible": False,
+                "confidence": "low",
+                "reasoning": (
+                    "Could not assess eligibility."),
+                "key_factors": [],
+                "next_steps": [
+                    "Contact your local legal aid office",
+                    "Visit https://www.lawhelp.org"
+                ],
+                "disclaimer": get_disclaimer(
+                    lang, "standard"),
+                "error": str(e)
+            }

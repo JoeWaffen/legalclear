@@ -1,36 +1,54 @@
 import re
+from collections import Counter
+
 
 class TextCleaner:
-    def __init__(self):
-        pass
-        
+
     def clean(self, raw_text: str) -> str:
-        text = re.sub(r'[\x00]', '', raw_text)
-        text = re.sub(r'\n{3,}', '\n\n', text)
-        text = re.sub(r'[ \t]{2,}', ' ', text)
-        return text.strip()
+        text = raw_text.replace("\x00", "")
+        text = re.sub(r"[\x01-\x08\x0b\x0c\x0e-\x1f\x7f]",
+                      "", text)
+        text = re.sub(r"\n{3,}", "\n\n", text)
+        text = re.sub(r" {3,}", " ", text)
+        lines = text.split("\n")
+        line_counts = Counter(
+            l.strip() for l in lines if len(l.strip()) > 5)
+        repeated = {l for l, c in line_counts.items()
+                    if c >= 5}
+        cleaned = [l for l in lines
+                   if l.strip() not in repeated]
+        return "\n".join(cleaned).strip()
 
     def detect_language(self, text: str) -> str:
         text_lower = text.lower()
-        spanish_words = ['contrato', 'acuerdo', 'demanda', 'tribunal', 'firmante', 'arrendamiento']
-        english_words = ['agreement', 'contract', 'plaintiff', 'defendant', 'lease', 'hereby']
-        
-        es_count = sum(text_lower.count(w) for w in spanish_words)
-        en_count = sum(text_lower.count(w) for w in english_words)
-        
-        if es_count > en_count:
-            return 'es'
-        return 'en'
+        spanish_words = [
+            "contrato", "acuerdo", "demanda", "tribunal",
+            "firmante", "arrendamiento", "inquilino",
+            "propietario", "plazo", "pago"
+        ]
+        english_words = [
+            "agreement", "contract", "plaintiff",
+            "defendant", "lease", "hereby", "whereas",
+            "tenant", "landlord", "party"
+        ]
+        es_count = sum(1 for w in spanish_words
+                       if w in text_lower)
+        en_count = sum(1 for w in english_words
+                       if w in text_lower)
+        return "es" if es_count > en_count else "en"
 
-    def truncate_for_llm(self, text: str, max_tokens: int = 90000) -> str:
-        approx_tokens = int(len(text.split()) * 1.3)
-        if approx_tokens <= max_tokens:
+    def truncate_for_llm(self, text: str,
+                          max_tokens: int = 90000) -> str:
+        estimated = int(len(text.split()) * 1.3)
+        if estimated <= max_tokens:
             return text
-            
-        words = text.split()
-        keep_total = int(max_tokens / 1.3)
-        first_part_len = int(keep_total * 0.6)
-        last_part_len = int(keep_total * 0.4)
-        
-        truncated = words[:first_part_len] + ["[Document truncated for processing]"] + words[-last_part_len:]
-        return " ".join(truncated)
+        target_chars = int(
+            len(text) * max_tokens / estimated)
+        first_part = int(target_chars * 0.6)
+        last_part = int(target_chars * 0.4)
+        notice = (
+            "\n\n[Document truncated for processing. "
+            "Some middle sections omitted.]\n\n"
+        )
+        return (text[:first_part] + notice +
+                text[len(text) - last_part:])

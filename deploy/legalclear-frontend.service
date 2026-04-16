@@ -1,14 +1,12 @@
 [Unit]
-Description=LegalClear Web Frontend
-After=network-online.target
+Description=LegalClear React Frontend
+After=network.target
 
 [Service]
-Type=simple
-User=YOUR_USERNAME_HERE
-WorkingDirectory=/home/YOUR_USERNAME_HERE/legalclear/frontend
-ExecStart=/usr/bin/npm run preview -- --port 3000 --host
+User=joe
+WorkingDirectory=/home/joe/.gemini/antigravity/scratch/legalclear/frontend
+ExecStart=/usr/bin/npm run preview -- --port 3000 --host 0.0.0.0
 Restart=always
-RestartSec=5
 
 [Install]
 WantedBy=multi-user.target

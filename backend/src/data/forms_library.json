@@ -1,79 +1,72 @@
 {
   "IRS_1040": {
-    "form_name": "U.S. Individual Income Tax Return",
-    "issuing_agency": "IRS",
+    "form_name": "Form 1040",
+    "issuing_agency": "Internal Revenue Service",
     "jurisdiction_type": "Federal",
-    "official_url": "https://www.irs.gov/forms-pubs/about-form-1040",
-    "description": "Standard standard federal income tax form used to report an individual's gross income."
+    "official_url": "https://www.irs.gov/pub/irs-pdf/f1040.pdf",
+    "description": "U.S. Individual Income Tax Return"
   },
   "IRS_W9": {
-    "form_name": "Request for Taxpayer Identification Number and Certification",
-    "issuing_agency": "IRS",
+    "form_name": "Form W-9",
+    "issuing_agency": "Internal Revenue Service",
     "jurisdiction_type": "Federal",
-    "official_url": "https://www.irs.gov/forms-pubs/about-form-w-9",
-    "description": "Used by employers to collect taxpayer identification numbers."
+    "official_url": "https://www.irs.gov/pub/irs-pdf/fw9.pdf",
+    "description": "Request for Taxpayer Identification Number and Certification"
   },
   "USCIS_I485": {
-    "form_name": "Application to Register Permanent Residence or Adjust Status",
+    "form_name": "Form I-485",
     "issuing_agency": "USCIS",
     "jurisdiction_type": "Federal",
-    "official_url": "https://www.uscis.gov/i-485",
-    "description": "Application for lawful permanent resident status (Green Card)."
+    "official_url": "https://www.uscis.gov/sites/default/files/document/forms/i-485.pdf",
+    "description": "Application to Register Permanent Residence or Adjust Status"
   },
   "USCIS_N400": {
-    "form_name": "Application for Naturalization",
+    "form_name": "Form N-400",
     "issuing_agency": "USCIS",
     "jurisdiction_type": "Federal",
-    "official_url": "https://www.uscis.gov/n-400",
-    "description": "Application to apply for US citizenship."
+    "official_url": "https://www.uscis.gov/sites/default/files/document/forms/n-400.pdf",
+    "description": "Application for Naturalization"
   },
-  "SSA_DISABILITY": {
-    "form_name": "Application for Social Security Disability Benefits",
-    "issuing_agency": "SSA",
+  "SSA_disability": {
+    "form_name": "Disability Benefit Application",
+    "issuing_agency": "Social Security Administration",
     "jurisdiction_type": "Federal",
     "official_url": "https://www.ssa.gov/benefits/disability/",
-    "description": "Application to apply for disability benefits."
+    "description": "Application for Social Security Disability Benefits"
   },
-  "FL_SC_7B": {
-    "form_name": "Florida Small Claims Complaint Form 7B",
-    "issuing_agency": "Florida State Courts",
+  "FL_small_claims_7B": {
+    "form_name": "Form 7.322",
+    "issuing_agency": "Florida Supreme Court",
     "jurisdiction_type": "State",
-    "official_url": "https://www.flcourts.gov/",
-    "description": "Standard form for initiating a small claims lawsuit in Florida."
+    "official_url": "https://www.floridasupremecourt.org",
+    "description": "Statement of Claim"
   },
-  "FL_CIVIL_1_997": {
-    "form_name": "Florida Civil Cover Sheet 1.997",
-    "issuing_agency": "Florida State Courts",
+  "FL_civil_cover_1997": {
+    "form_name": "Civil Cover Sheet",
+    "issuing_agency": "Florida Supreme Court",
     "jurisdiction_type": "State",
-    "official_url": "https://www.flcourts.gov/",
-    "description": "Mandatory cover sheet for civil lawsuits filed in Florida."
+    "official_url": "https://www.floridasupremecourt.org",
+    "description": "Civil Cover Sheet"
   },
-  "CA_SC_100": {
-    "form_name": "Plaintiff's Claim and ORDER to Go to Small Claims Court",
-    "issuing_agency": "California Courts",
+  "CA_SC100": {
+    "form_name": "SC-100",
+    "issuing_agency": "California Judicial Council",
     "jurisdiction_type": "State",
-    "official_url": "https://www.courts.ca.gov/forms.htm",
-    "description": "Official CA form SC-100 to start a small claims case."
+    "official_url": "https://www.courts.ca.gov/documents/sc100.pdf",
+    "description": "Plaintiff's Claim and ORDER to Go to Small Claims Court"
   },
-  "NY_SC_GUIDE": {
-    "form_name": "New York Small Claims Guide",
-    "issuing_agency": "NY State Courts",
+  "generic_eviction_response": {
+    "form_name": "Eviction Response",
+    "issuing_agency": "Generic",
     "jurisdiction_type": "State",
-    "official_url": "https://nycourts.gov/courthelp/",
-    "description": "Guide on how to commence a small claims proceeding in NY."
-  },
-  "EVICTION_RESPONSE": {
-    "form_name": "Generic Eviction Response",
-    "issuing_agency": "Various",
-    "jurisdiction_type": "State/Local",
     "official_url": "",
-    "description": "A general template used to respond to a landlord eviction notice."
+    "description": "Generic form to respond to an eviction notice"
   },
-  "EXPUNGEMENT_PETITION": {
-    "form_name": "Generic Expungement Petition",
-    "issuing_agency": "Various",
-    "jurisdiction_type": "State/Local",
+  "generic_expungement": {
+    "form_name": "Expungement Petition",
+    "issuing_agency": "Generic",
+    "jurisdiction_type": "State",
     "official_url": "",
-    "description": "A template petition for expunging or sealing criminal records."
+    "description": "Generic petition to expunge criminal records"
   }
 }

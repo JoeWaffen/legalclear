@@ -1,25 +1,35 @@
-from pydantic_settings import BaseSettings, SettingsConfigDict
+import os
+from dotenv import load_dotenv
 
-class Settings(BaseSettings):
-    ANTHROPIC_API_KEY: str = ""
-    SUPABASE_URL: str = ""
-    SUPABASE_ANON_KEY: str = ""
-    SUPABASE_SERVICE_KEY: str = ""
-    STRIPE_SECRET_KEY: str = ""
-    STRIPE_WEBHOOK_SECRET: str = ""
-    STRIPE_PRICE_SMALL: str = "price_xxx"
-    STRIPE_PRICE_MEDIUM: str = "price_xxx"
-    STRIPE_PRICE_LARGE: str = "price_xxx"
-    STRIPE_SUBSCRIPTION_PRICE_ID: str = "price_xxx"
-    API_KEY: str = ""
-    ENVIRONMENT: str = "development"
-    EXPO_PUSH_TOKEN_TABLE: str = "push_tokens"
-    MESSAGING_PLATFORM: str = ""
+load_dotenv()
 
-    model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8')
+
+class Settings:
+    ANTHROPIC_API_KEY: str = os.getenv("ANTHROPIC_API_KEY", "")
+    SUPABASE_URL: str = os.getenv("SUPABASE_URL", "")
+    SUPABASE_ANON_KEY: str = os.getenv("SUPABASE_ANON_KEY", "")
+    SUPABASE_SERVICE_KEY: str = os.getenv(
+        "SUPABASE_SERVICE_KEY", "")
+    STRIPE_SECRET_KEY: str = os.getenv("STRIPE_SECRET_KEY", "")
+    STRIPE_WEBHOOK_SECRET: str = os.getenv(
+        "STRIPE_WEBHOOK_SECRET", "")
+    STRIPE_PRICE_SMALL: str = os.getenv(
+        "STRIPE_PRICE_SMALL", "")
+    STRIPE_PRICE_MEDIUM: str = os.getenv(
+        "STRIPE_PRICE_MEDIUM", "")
+    STRIPE_PRICE_LARGE: str = os.getenv(
+        "STRIPE_PRICE_LARGE", "")
+    STRIPE_SUBSCRIPTION_PRICE_ID: str = os.getenv(
+        "STRIPE_SUBSCRIPTION_PRICE_ID", "")
+    API_KEY: str = os.getenv("API_KEY", "testkey123")
+    ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development")
+    MESSAGING_PLATFORM: str = os.getenv(
+        "MESSAGING_PLATFORM", "log")
+    BACKEND_PORT: int = int(os.getenv("BACKEND_PORT", "8001"))
 
     @property
     def is_development(self) -> bool:
-        return self.ENVIRONMENT == 'development'
+        return self.ENVIRONMENT == "development"
+
 
 settings = Settings()
