@@ -1,6 +1,4 @@
 import os
-import json
-from src.core.config import settings
 
 class PDFAGenerator:
     def generate_complaint(self, case_data, output_path):
