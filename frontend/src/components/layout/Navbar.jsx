@@ -40,6 +40,13 @@ export default function Navbar() {
               <LayoutDashboard className="w-4 h-4" />
               Dashboard
             </Link>
+            <Link
+              to="/eligibility"
+              className={`text-sm font-medium transition-colors hover:text-white flex items-center gap-1 ${isActive('/eligibility') ? 'text-white' : 'text-gray-400'}`}
+            >
+              <Scale className="w-4 h-4" />
+              Eligibility
+            </Link>
             <Link to="/upload" className="btn-primary text-sm py-2 px-4 shadow-primary/20">
               Get Started
             </Link>
@@ -62,6 +69,7 @@ export default function Navbar() {
             <Link to="/" onClick={() => setIsMenuOpen(false)} className="text-gray-300 hover:text-white">Home</Link>
             <Link to="/upload" onClick={() => setIsMenuOpen(false)} className="text-gray-300 hover:text-white">Upload Document</Link>
             <Link to="/dashboard" onClick={() => setIsMenuOpen(false)} className="text-gray-300 hover:text-white">Dashboard</Link>
+            <Link to="/eligibility" onClick={() => setIsMenuOpen(false)} className="text-gray-300 hover:text-white">Eligibility</Link>
           </div>
         </div>
       )}
