@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { AlertOctagon, CheckCircle2, AlertTriangle, FileText, Settings, ShieldAlert, FileCheck, MessageSquare, Menu, Home, Upload, BarChart2, Bell } from 'lucide-react';
+import { AlertOctagon, CheckCircle2, AlertTriangle, FileText, Settings, ShieldAlert, FileCheck, MessageSquare, Home, Upload, BarChart2, Bell } from 'lucide-react';
 
 export default function AnalysisDashboard() {
   const [activeTab, setActiveTab] = useState('summary');
