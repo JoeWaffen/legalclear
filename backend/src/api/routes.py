@@ -37,11 +37,11 @@ stripe_client = StripeClient()
 escalation_router = EscalationRouter()
 notifications = NotificationService()
 
-FORM_CATEGORIES = [
+FORM_CATEGORIES = {
     "government_form", "court_filing",
     "small_claims_complaint", "small_claims_response",
     "small_claims_judgment"
-]
+}
 
 def verify_api_key(x_api_key: str = Header(default="")):
     if x_api_key != settings.API_KEY:
