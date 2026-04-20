@@ -10,7 +10,7 @@ async def test():
     try:
         res = await upload_document(f, "123", "en")
         print(res)
-    except Exception as e:
+    except Exception:
         import traceback
         traceback.print_exc()
 

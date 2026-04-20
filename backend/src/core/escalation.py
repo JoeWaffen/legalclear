@@ -16,19 +16,20 @@ def _load_jurisdictions():
 
 _JURISDICTIONS = _load_jurisdictions()
 
-_STANDARD = [
+# ⚡ Bolt Optimization: Converted _STANDARD, _ELEVATED, and _CRIMINAL from list to set for O(1) membership lookups
+_STANDARD = {
     "contract", "agreement", "real_estate", "employment",
     "financial", "will_estate", "notice", "other"
-]
-_ELEVATED = [
+}
+_ELEVATED = {
     "government_form", "court_filing",
     "small_claims_complaint", "small_claims_response",
     "small_claims_judgment", "expungement_petition"
-]
-_CRIMINAL = [
+}
+_CRIMINAL = {
     "criminal_charge", "criminal_summons",
     "restraining_order"
-]
+}
 
 _LINKS_EN = [
     {"label": "Find free legal aid",

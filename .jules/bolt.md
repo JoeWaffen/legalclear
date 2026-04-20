@@ -1,0 +1,3 @@
+## 2024-05-30 - Optimize Collection Lookups
+**Learning:** Checking for membership in lists (e.g., `x in list`) operates in O(n) time, causing performance bottlenecks, particularly when dealing with frequently accessed collections like form categories, escalation categories, or validation categories in the core backend routes. Turning these collections into sets (e.g., `set([...])`) optimizes membership checks to O(1) and provides a measurable micro-optimization for high-traffic operations.
+**Action:** Always use sets (`set()` or `{...}`) instead of lists for fast O(1) membership lookups (like `in` operators) in globally defined constants and validation arrays.
