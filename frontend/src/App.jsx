@@ -3,6 +3,7 @@ import Navbar from './components/layout/Navbar';
 import LandingPage from './pages/LandingPage';
 import UploadFlow from './pages/UploadFlow';
 import AnalysisDashboard from './pages/AnalysisDashboard';
+import EligibilityPage from './pages/EligibilityPage';
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
             <Route path="/" element={<LandingPage />} />
             <Route path="/upload" element={<UploadFlow />} />
             <Route path="/dashboard" element={<AnalysisDashboard />} />
+            <Route path="/eligibility" element={<EligibilityPage />} />
           </Routes>
         </main>
       </div>
