@@ -96,13 +96,18 @@ class DatabaseManager:
 
     def create_document(
             self, session_id: str,
-            document_text: str = "") -> str:
+            document_text: str = "",
+            classification: dict = None) -> str:
+        data = {
+            "session_id": session_id,
+            "document_text": document_text,
+            "status": "processing"
+        }
+        if classification is not None:
+            data["classification"] = classification
+
         result = (self.client.table("documents")
-                  .insert({
-                      "session_id": session_id,
-                      "document_text": document_text,
-                      "status": "processing"
-                  }).execute())
+                  .insert(data).execute())
         return result.data[0]["id"]
 
     def save_results(
