@@ -1,13 +1,11 @@
 from .classifier import ClassifierAgent
 from .explainer import ExplainerAgent
 from .form_guide import FormGuideAgent
-from .risk_scanner import RiskScannerAgent
 from .expungement import ExpungementAgent
 
 __all__ = [
     'ClassifierAgent',
     'ExplainerAgent',
     'FormGuideAgent',
-    'RiskScannerAgent',
     'ExpungementAgent'
 ]
