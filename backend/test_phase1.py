@@ -1,4 +1,6 @@
-import asyncio, sys, os
+import asyncio
+import sys
+import os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from src.ingestion import ingest_document
 
@@ -8,7 +10,7 @@ async def run():
         data = f.read()
 
     result = await ingest_document(data, "test_lease.pdf")
-    assert result["error"] == False, f"Error: {result}"
+    assert not result["error"], f"Error: {result}"
     assert result["extraction_method"] in [
         "pdf", "ocr_fallback"]
     assert result["language"] == "en"
@@ -20,12 +22,12 @@ async def run():
     print(f"preview: {result['text'][:150]}")
 
     big = await ingest_document(b"x" * 20_000_000, "big.pdf")
-    assert big["error"] == True
+    assert big["error"]
     assert big["error_code"] == "document_too_large"
     print("Size gate OK")
 
     bad = await ingest_document(b"garbage data", "file.xyz")
-    assert bad["error"] == True
+    assert bad["error"]
     print("Format gate OK")
 
     print("\nALL PHASE 1 ASSERTIONS PASSED")

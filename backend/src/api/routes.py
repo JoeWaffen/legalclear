@@ -1,8 +1,6 @@
 from fastapi import FastAPI, Depends, HTTPException, Header, Request, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
-from typing import List, Dict, Any, Optional
 from pydantic import BaseModel
-import logging
 
 from src.core.config import settings
 from src.core.escalation import EscalationRouter
@@ -37,11 +35,12 @@ stripe_client = StripeClient()
 escalation_router = EscalationRouter()
 notifications = NotificationService()
 
-FORM_CATEGORIES = [
+# ⚡ Bolt Optimization: Converted from list to set for O(1) membership lookups
+FORM_CATEGORIES = {
     "government_form", "court_filing",
     "small_claims_complaint", "small_claims_response",
     "small_claims_judgment"
-]
+}
 
 def verify_api_key(x_api_key: str = Header(default="")):
     if x_api_key != settings.API_KEY:

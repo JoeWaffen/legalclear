@@ -1,4 +1,5 @@
-import sys, os
+import sys
+import os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from src.payments import check_access
@@ -8,7 +9,7 @@ def test():
     r = check_access(
         {"subscription_status": "active",
          "free_doc_used": True})
-    assert r["allowed"] == True
+    assert r["allowed"]
     assert r["payment_type"] == "subscription"
     print("1. Subscription access OK")
 
@@ -16,7 +17,7 @@ def test():
     r = check_access(
         {"subscription_status": "free",
          "free_doc_used": False})
-    assert r["allowed"] == True
+    assert r["allowed"]
     assert r["payment_type"] == "free"
     print("2. Free doc access OK")
 
@@ -25,7 +26,7 @@ def test():
         {"subscription_status": "free",
          "free_doc_used": True},
         {"payment_status": "paid"})
-    assert r["allowed"] == True
+    assert r["allowed"]
     assert r["payment_type"] == "payg"
     print("3. PAYG access OK")
 
@@ -34,7 +35,7 @@ def test():
         {"subscription_status": "free",
          "free_doc_used": True},
         {"payment_status": "pending"})
-    assert r["allowed"] == False
+    assert not r["allowed"]
     print("4. Blocked access OK")
 
     print("\nALL PHASE 9 ASSERTIONS PASSED")

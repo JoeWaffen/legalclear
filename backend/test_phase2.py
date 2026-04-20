@@ -1,4 +1,6 @@
-import sys, os, asyncio
+import sys
+import os
+import asyncio
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from src.core.config import settings
@@ -28,7 +30,7 @@ def test():
          "jurisdiction_name": "Florida"}, "es")
     assert r["escalation_color"] == "red"
     assert r["pre_analysis_warning"] is not None
-    assert r["show_public_defender_info"] == True
+    assert r["show_public_defender_info"]
     print("4. Escalation plea=red OK")
 
     r2 = router.route(
@@ -45,7 +47,7 @@ def test():
     async def _notify():
         n = NotificationService()
         r = await n.send("user_1", "Test", "Hello")
-        assert r["sent"] == True
+        assert r["sent"]
         assert r["method"] == "log"
         print("7. Notification log OK")
 
