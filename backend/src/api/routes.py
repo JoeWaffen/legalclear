@@ -145,7 +145,7 @@ async def upload_document(
         payment_type=access["payment_type"]
     )
     
-    document_id = db.create_document(session_id, doc.get("text", ""))
+    document_id = db.create_document(session_id, doc.get("text", ""), classification)
     
     response = {
         "session_id": session_id,
@@ -187,10 +187,10 @@ async def process_document(session_id: str, background_tasks: BackgroundTasks, l
     document_text = doc_record["document_text"]
     
     doc = {"text": document_text}
-    # For Phase 10 validation we must fetch the classification from DB or re-run
-    # Re-running here is okay to ensure state consistency for tests, but normally we'd pull from document table.
-    # To be safe and save time, since the prompt implies processing completes here:
-    classification = await classifier.classify(doc)
+
+    classification = doc_record.get("classification")
+    if not classification:
+        classification = await classifier.classify(doc)
     
     explanation = await explainer.explain(doc, classification, lang)
     risk_scan = await risk_scanner.scan(doc, classification, lang)
