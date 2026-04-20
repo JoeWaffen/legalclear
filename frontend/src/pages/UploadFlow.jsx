@@ -40,12 +40,13 @@ export default function UploadFlow() {
     
     try {
       const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8001";
+      const apiKey = import.meta.env.VITE_API_KEY || "";
       const arrayBuffer = await file.arrayBuffer();
       
       const uploadRes = await fetch(`${apiUrl}/upload`, {
         method: 'POST',
         headers: {
-          'x-api-key': 'testkey123',
+          'x-api-key': apiKey,
           'user-id': 'proto_user_001',
           'email': 'proto@example.com',
           'filename': encodeURIComponent(file.name),
@@ -64,7 +65,7 @@ export default function UploadFlow() {
       if (sessionId) {
           const processRes = await fetch(`${apiUrl}/process/${sessionId}?lang=en`, {
             method: 'POST',
-            headers: { 'x-api-key': 'testkey123' }
+            headers: { 'x-api-key': apiKey }
           });
           if (!processRes.ok) throw new Error("Processing logic failed or hit a context limit.");
       }
