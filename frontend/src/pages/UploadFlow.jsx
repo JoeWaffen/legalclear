@@ -39,7 +39,7 @@ export default function UploadFlow() {
     setIsProcessing(true);
     
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8001";
+      const apiUrl = import.meta.env.VITE_API_URL;
       const arrayBuffer = await file.arrayBuffer();
       
       const uploadRes = await fetch(`${apiUrl}/upload`, {
@@ -70,7 +70,7 @@ export default function UploadFlow() {
       }
       
       setIsProcessing(false);
-      navigate('/dashboard');
+      navigate(`/results/${sessionId}`);
     } catch (err) {
       console.error(err);
       alert("Error analyzing file: " + err.message);
