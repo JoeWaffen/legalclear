@@ -1,5 +1,7 @@
 import json
 from anthropic import Anthropic
+
+from src.utils.chat import append_chat_history
 from src.core.config import settings
 from src.core.disclaimer import get_disclaimer
 
@@ -137,11 +139,7 @@ Document text:
             }
         ]
 
-        for msg in chat_history:
-            messages.append({
-                "role": msg.get("role", "user"),
-                "content": msg.get("content", "")
-            })
+        append_chat_history(messages, chat_history)
 
         messages.append({
             "role": "user",
