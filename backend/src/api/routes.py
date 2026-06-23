@@ -43,6 +43,19 @@ FORM_CATEGORIES = [
     "small_claims_judgment"
 ]
 
+from src.api.services.document_processor import DocumentProcessingService
+document_processor = DocumentProcessingService(
+    db=db,
+    classifier=classifier,
+    explainer=explainer,
+    risk_scanner=risk_scanner,
+    form_guide=form_guide,
+    expungement=expungement,
+    escalation_router=escalation_router,
+    notifications=notifications,
+    form_categories=FORM_CATEGORIES
+)
+
 def verify_api_key(x_api_key: str = Header(default="")):
     if x_api_key != settings.API_KEY:
         raise HTTPException(status_code=401, detail="Invalid API Key")
@@ -169,76 +182,7 @@ async def upload_document(
 
 @app.post("/process/{session_id}", dependencies=[Depends(verify_api_key)])
 async def process_document(session_id: str, background_tasks: BackgroundTasks, lang: str = "en"):
-    session = db.get_session(session_id)
-    if not session:
-        raise HTTPException(status_code=404, detail="Session not found")
-        
-    user = db.get_user(session["user_id"])
-    access = check_access(user, session)
-    if not access["allowed"]:
-        raise HTTPException(status_code=402, detail="Payment required")
-        
-    docs = db.client.table("documents").select("*").eq("session_id", session_id).execute()
-    if not docs.data:
-        raise HTTPException(status_code=404, detail="Document not found")
-    
-    doc_record = docs.data[0]
-    document_id = doc_record["id"]
-    document_text = doc_record["document_text"]
-    
-    doc = {"text": document_text}
-    # For Phase 10 validation we must fetch the classification from DB or re-run
-    # Re-running here is okay to ensure state consistency for tests, but normally we'd pull from document table.
-    # To be safe and save time, since the prompt implies processing completes here:
-    classification = await classifier.classify(doc)
-    
-    explanation = await explainer.explain(doc, classification, lang)
-    risk_scan = await risk_scanner.scan(doc, classification, lang)
-    
-    form_results = {}
-    if classification.get("document_category") in FORM_CATEGORIES:
-        form_results = await form_guide.guide(doc, classification, lang)
-        
-    exp_results = {}
-    if classification.get("document_category") == "expungement_petition":
-        exp_results = await expungement.guide(doc, classification, lang)
-        
-    escalation = escalation_router.route(classification, lang)
-    
-    db.save_results(
-        document_id=document_id,
-        classification=classification,
-        explanation=explanation,
-        form_guide=form_results,
-        risk_scan=risk_scan,
-        expungement_guide=exp_results,
-        escalation=escalation,
-        language=lang
-    )
-    
-    if access["payment_type"] == "free":
-        db.mark_free_doc_used(user["id"])
-        
-    db.log_usage(
-        category=classification.get("document_category", "unknown"),
-        jurisdiction=classification.get("jurisdiction_name", "unknown"),
-        language=lang,
-        price_tier=session.get("price_tier", "small"),
-        processing_time=0.0
-    )
-    
-    # Notify
-    background_tasks.add_task(notifications.send_push, user["id"], "Analysis Complete", "Your document analysis is ready to view.")
-    
-    return {
-        "document_id": document_id,
-        "classification": classification,
-        "explanation": explanation,
-        "risk_scan": risk_scan,
-        "form_guide": form_results,
-        "expungement": exp_results,
-        "escalation": escalation
-    }
+    return await document_processor.process(session_id, background_tasks, lang)
 
 @app.post("/chat/{document_id}", dependencies=[Depends(verify_api_key)])
 async def chat(document_id: str, question: str, lang: str = "en"):
