@@ -2,7 +2,6 @@ from fastapi import FastAPI, Depends, HTTPException, Header, Request, Background
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Dict, Any, Optional
 from pydantic import BaseModel
-import logging
 
 from src.core.config import settings
 from src.core.escalation import EscalationRouter
