@@ -2,6 +2,7 @@ import json
 from anthropic import Anthropic
 from src.core.config import settings
 from src.core.disclaimer import get_disclaimer
+from src.agents.base import BaseAgent
 
 SYSTEM_PROMPT = (
     "You are a legal document risk scanner for LegalClear. "
@@ -19,7 +20,7 @@ SYSTEM_PROMPT = (
 )
 
 
-class RiskScannerAgent:
+class RiskScannerAgent(BaseAgent):
 
     def __init__(self):
         self.client = Anthropic(
@@ -68,30 +69,9 @@ empty list otherwise
 Document text:
 {document.get("text", "")[:60000]}"""
 
-        try:
-            response = self.client.messages.create(
-                model=self.model,
-                max_tokens=4096,
-                system=[{
-                    "type": "text",
-                    "text": SYSTEM_PROMPT,
-                    "cache_control": {"type": "ephemeral"}
-                }],
-                messages=[{
-                    "role": "user",
-                    "content": user_prompt
-                }]
-            )
-            raw = response.content[0].text.strip()
-            if raw.startswith("```"):
-                raw = raw.split("```")[1]
-                if raw.startswith("json"):
-                    raw = raw[4:]
-            result = json.loads(raw)
-            result["disclaimer"] = get_disclaimer(
-                lang, "standard")
-            return result
-        except Exception as e:
-            return {"error": True, "message": str(e),
-                    "disclaimer": get_disclaimer(
-                        lang, "standard")}
+        return await self._get_anthropic_json(
+            model=self.model,
+            system_prompt=SYSTEM_PROMPT,
+            user_prompt=user_prompt,
+            lang=lang
+        )
