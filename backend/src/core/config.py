@@ -21,7 +21,7 @@ class Settings:
         "STRIPE_PRICE_LARGE", "")
     STRIPE_SUBSCRIPTION_PRICE_ID: str = os.getenv(
         "STRIPE_SUBSCRIPTION_PRICE_ID", "")
-    API_KEY: str = os.getenv("API_KEY", "testkey123")
+    API_KEY: str | None = os.getenv("API_KEY")
     ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development")
     MESSAGING_PLATFORM: str = os.getenv(
         "MESSAGING_PLATFORM", "log")
